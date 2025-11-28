@@ -1,123 +1,186 @@
-#  Proyecto Steam — Pipeline de Análisis Steam + Twitch
+# Proyecto Steam — Pipeline de Análisis Steam + Twitch
 
-##  Resumen
-Este proyecto implementa un **pipeline de datos end-to-end** para correlacionar métricas de juegos de Steam  
-(metadatos, precios, etc.) con métricas sociales extraídas de Twitch (horas vistas, promedio de espectadores, etc.).
+## 1. Objetivos
 
-El objetivo es analizar qué factores están asociados al rendimiento y popularidad de los videojuegos en ambas plataformas.
+Este proyecto tiene como objetivo analizar cómo se relacionan métricas provenientes de videojuegos publicados en Steam (precio, género, calificación y popularidad) con métricas sociales y de audiencia provenientes de Twitch (horas vistas, espectadores promedio y ranking de popularidad).
 
-##  Estructura del repositorio
+Los objetivos específicos son:
 
+- Construir un pipeline automatizado para procesar datos de ambas plataformas.
+- Integrar diversas fuentes de datos y validarlas.
+- Identificar relaciones significativas entre el rendimiento comercial y el rendimiento social.
+- Aplicar principios DataOps para lograr reproducibilidad, monitoreo y escalabilidad.
+- Generar resultados automáticos y trazables.
+
+---
+
+## 2. Diseño y Arquitectura
+
+El proyecto está organizado como un pipeline modular:
+
+```
 Proyecto_Steam/
-├─ config/              # Configuración del pipeline
+├─ config/
 │  └─ pipeline_config.yaml
 ├─ data/
-│  ├─ raw/              # Datos originales (CSV) – gestionados con Git LFS
-│  └─ processed/        # Salidas del pipeline (merge, análisis, reportes)
+│  ├─ raw/
+│  └─ processed/
 ├─ src/
-│  ├─ data_ingestion.py       # Carga de datos
-│  ├─ data_transformation.py  # Limpieza y transformación
-│  ├─ data_validation.py      # Validaciones de consistencia
-│  ├─ analysis.py             # Análisis estadísticos (Spearman, Kruskal-Wallis)
-│  └─ orchestrator.py         # Ejecuta el pipeline completo
-├─ tests/               # Pruebas unitarias
+│  ├─ data_ingestion.py
+│  ├─ data_transformation.py
+│  ├─ data_validation.py
+│  ├─ analysis.py
+│  └─ orchestrator.py
+├─ tests/
 └─ requirements.txt
-
-##  Requisitos
-
-- Python **3.10+**
-- Paquetes incluidos en `requirements.txt`
-- **Git LFS** para manejar los CSV grandes
-
-## 🛠 Instalación local (Windows PowerShell)
-
-### 1. Crear entorno virtual
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Instalar dependencias
-```powershell
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+Los componentes principales del pipeline son:
 
-### 3. (Opcional) Instalar Git LFS
-```powershell
-git lfs install
-```
+### data_ingestion.py
 
-##  Datos grandes (Git LFS)
+- Carga los datos desde CSV utilizando rutas configurables.
+- Soporta datos locales o remotos.
+- Manejo de archivos grandes mediante Git LFS.
 
-Los archivos ubicados en `data/raw/` se manejan con Git LFS.  
-Clonado recomendado:
+### data_transformation.py
 
-```powershell
-git lfs install
-git clone https://github.com/OscarSantiagoMerino/Proyecto_Steam.git
-cd Proyecto_Steam
-git lfs pull
-```
+- Limpieza de nulos y duplicados.
+- Estandarización de tipos de datos.
+- Unión de tablas Steam + Twitch.
 
-Si no deseas usar LFS, el pipeline puede configurarse para leer los datos desde almacenamiento externo.
+### data_validation.py
 
-##  Ejecutar el pipeline
+- Verifica la calidad del dataset.
+- Asegura que no existan columnas inválidas o inconsistentes.
+- Reglas de validación centralizadas.
 
-Con los datos en `data/raw/`, correr:
+### analysis.py
 
-```powershell
-python src/orchestrator.py
-```
+- Correlaciones entre variables (Spearman).
+- Estadísticos descriptivos.
+- Comparación entre los juegos con mayor popularidad.
 
-Esto ejecuta:
-- Ingesta de datos  
-- Transformación  
-- Validación  
-- Análisis estadístico  
+### orchestrator.py
 
-Los resultados quedan en `data/processed/`.
+- Ejecuta todo el pipeline end‑to‑end.
+- Produce una versión final limpia de los datos.
+- Registra logs para auditoría.
 
-##  Tests
+---
+
+## 3. Metodología
+
+La metodología aplicada fue la siguiente:
+
+1. Extracción de datos desde Steam y Twitch.
+2. Preprocesamiento: normalización, conversión de tipos, limpieza.
+3. Validación de datos mediante reglas automáticas.
+4. Transformación y fusión de datasets.
+5. Análisis estadístico:
+   - Correlación Spearman.
+   - Análisis de categorías y precios.
+6. Registro de resultados y logs.
+7. Ejecución automática mediante CI/CD.
+
+---
+
+## 4. Resultados clave
+
+Los resultados se generan automáticamente en `data/processed/`.
+
+Algunos hallazgos esperados:
+
+- Los juegos con precios menores tienden a tener mayor audiencia.
+- Ciertos géneros son más consumidos en Twitch independientemente del precio.
+- Las métricas sociales pueden predecir popularidad en Steam.
+
+Los resultados cambian conforme los datos se actualizan en el pipeline.
+
+---
+
+## 5. Pruebas automatizadas y logs
+
+Los tests se ejecutan con:
 
 ```powershell
 pytest -q
 ```
 
-o:
+Se realizaron pruebas unitarias para:
+
+- Validación de datos.
+- Transformaciones.
+- Correlaciones.
+- Integración del pipeline completo.
+
+### Logs
+
+El pipeline produce logs automáticos sobre:
+
+- Ingesta de datos.
+- Transformaciones.
+- Errores durante ejecución.
+- Estadísticas del procesamiento.
+
+Estos logs son accesibles tanto en ejecución local como en CI.
+
+---
+
+## 6. Reflexión sobre principios DataOps aplicados
+
+Se aplicaron los siguientes principios DataOps:
+
+- Automatización del flujo de datos de inicio a fin.
+- Control de versiones y trazabilidad de datos mediante Git LFS.
+- Pipeline reproducible tanto local como en CI/CD.
+- Validaciones automáticas para garantizar calidad del dato.
+- Módulos desacoplados para mantenimiento incremental.
+- Observabilidad mediante logs y pruebas automáticas.
+
+El proyecto asegura que cualquier persona pueda ejecutar el pipeline y obtener los mismos resultados sin intervención manual.
+
+---
+
+## 7. Ejecutar el pipeline
 
 ```powershell
-python run_tests_custom.py
+python src/orchestrator.py
 ```
 
-##  CI/CD (GitHub Actions)
+Esto generará:
 
-El workflow ubicado en:
+- Datos transformados.
+- Reportes de análisis.
+- Resultados estadísticos.
+
+---
+
+## 8. CI/CD (GitHub Actions)
+
+Archivo ubicado en:
 
 ```
 .github/workflows/ci.yaml
 ```
 
-realiza:
+Se ejecuta automáticamente para:
 
-- Checkout con soporte LFS
-- Instalación del entorno
-- Ejecución del pipeline y tests
-- Publicación de artefactos (logs, resultados)
+- Instalar dependencias.
+- Cargar datos desde Git LFS.
+- Ejecutar pipeline y tests.
+- Publicar artefactos como logs y resultados.
 
-##  Recomendaciones
+---
 
-- Monitorea tu cuota de LFS (GitHub → Billing).
-- Si no deseas almacenar CSV pesados, puedes:
-  - Usar Azure Blob, AWS S3 o GitHub Releases
-  - Descargar los datos en CI desde una URL segura
-- Si necesitas:
-  - `requirements-dev.txt`
-  - formateo/lint (Black, Ruff)
-  - despliegue automático
+## 9. Requisitos
 
-puedo ayudarte a configurarlo.
+- Python 3.10+
+- Paquetes de requirements.txt
+- Git LFS para archivos grandes
 
-##  Contacto
+---
 
-mantenido por **OscarSantiagoMerino**.
+## 10. Contacto
+
+Proyecto mantenido por **OscarSantiagoMerino**.
