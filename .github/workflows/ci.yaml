@@ -20,6 +20,14 @@ jobs:
       with:
         python-version: "3.10"
 
+    - name: Download datasets from Azure Blob
+      run: |
+        mkdir -p data/raw
+        echo "Downloading steam_app_data.csv..."
+        curl -fSL --retry 3 https://datalakepractica123.blob.core.windows.net/proyectoendo/steam_app_data.csv -o data/raw/steam_app_data.csv
+        echo "Downloading Twitch_game_data.csv..."
+        curl -fSL --retry 3 https://datalakepractica123.blob.core.windows.net/proyectoendo/Twitch_game_data.csv -o data/raw/Twitch_game_data.csv
+
     - name: Cache pip
       uses: actions/cache@v4
       with:

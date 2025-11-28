@@ -29,6 +29,18 @@ def ingest_data(steam_path: str = None, twitch_path: str = None,
     output_dir = output_dir or raw_dir
     os.makedirs(output_dir, exist_ok=True)
 
+    # Comprobar existencia de los archivos antes de leer
+    if not os.path.exists(steam_file):
+        raise FileNotFoundError(
+            f"Archivo no encontrado: {steam_file}.\n"
+            "Sugerencia: sube el CSV al storage y configura el workflow para descargarlo."
+        )
+    if not os.path.exists(twitch_file):
+        raise FileNotFoundError(
+            f"Archivo no encontrado: {twitch_file}.\n"
+            "Sugerencia: sube el CSV al storage y configura el workflow para descargarlo."
+        )
+
     # Leer CSVs
     steam_df = pd.read_csv(steam_file, encoding="latin1", low_memory=False)
     twitch_df = pd.read_csv(twitch_file, encoding="latin1", low_memory=False)
