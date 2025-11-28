@@ -10,3 +10,5 @@ pyyaml
 pytest
 textblob
 vaderSentiment
+unidecode
+scipy
