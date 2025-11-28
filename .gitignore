@@ -39,6 +39,10 @@ ehthumbs.db
 *.json
 *.parquet
 
+# Permitimos archivos grandes en `data/raw/` (se gestionarán con Git LFS)
+!data/raw/
+!data/raw/*.csv
+
 # Opcional: permite solo una carpeta de datos
 # data/
 # !data/README.md
